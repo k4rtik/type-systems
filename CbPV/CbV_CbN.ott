@@ -1,0 +1,81 @@
+metavar x ::=
+% metavar A ::=
+
+grammar
+  M, N :: 'Tm_' ::=
+    | x                                   :: :: var
+    | let M be x . N                      :: :: let
+    | true                                :: :: tru
+    | false                               :: :: fls
+    | if M then N else N'                 :: :: ite
+    | inl M                               :: :: inl
+    | inr M                               :: :: inr
+    | pm M as { inl x . N , inr x' . N' } :: :: pm
+                (+ bind x in N +)
+                (+ bind x' in N' +)
+    | \ x . M                             :: :: lam
+    | M ` N                               :: :: app
+
+  A, B :: 'Ty_' ::=
+    | bool      :: :: bool
+    | A + A'    :: :: sum
+    | A -> A'   :: :: fn
+
+  G {{ tex \Gamma }} :: 'G_' ::=
+    | empty          :: :: emp
+    | G , x : A      :: :: cons
+    | G , x : A , G' :: :: mid
+
+  terminals :: 'terminals_' ::=
+    | \             ::  :: lambda     {{ tex \lambda }}
+    | |-            ::  :: turnstile  {{ tex \vdash }}
+    | ->            ::  :: fn         {{ tex \rightarrow }}
+
+defns
+  Jtype :: '' ::=
+
+defn
+  G |- M : A :: :: GtT :: T_ by
+
+  ----------------- :: var
+  G, x:A, G' |- x:A
+
+  G |- M:A
+  G,x:A |- N:B
+  ----------------------::let
+  G |- let M be x. N : B
+
+  ----------------::tru
+  G |- true : bool
+
+  -----------------::fls
+  G |- false : bool
+
+  G |- M:bool
+  G |- N:B
+  G |- N':B
+  ----------------------------::ite
+  G |- if M then N else N' : B
+
+  G |- M:A
+  -------------------::inl
+  G |- inl M : A + A'
+
+  G |- M:A'
+  -------------------::inr
+  G |- inr M : A + A'
+
+  G |- M : A + A'
+  G, x:A |- N:B
+  G, x':A' |- N':B
+  -------------------------------------::pm
+  G |- pm M as {inl x.N, inr x'.N'} : B
+
+  G,x:A |- M : B
+  ------------------ :: lam
+  G |- \x.M : A -> B
+
+  G |- M : A
+  G |- N : A -> B
+  --------------- :: app
+  G |- M`N : B
