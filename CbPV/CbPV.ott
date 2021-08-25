@@ -1,0 +1,123 @@
+metavar x, y ::=
+
+indexvar i ::=
+
+grammar
+  V :: 'V_' ::=
+    | x             :: :: var
+    | thunk M       :: :: thunk
+    | ( i , V )     :: :: sum
+    | ( V , V' )    :: :: pair
+
+  M, N :: 'M_' ::=
+    | let V be x . M                                :: :: let
+    | return V                                      :: :: return
+    | M to x . N                                    :: :: seq
+    | force V                                       :: :: force
+    | pm V as { . . . , ( i , x ) . Mi , . . . }    :: :: pm
+                        (+ bind x in Mi +)
+    | pm V as ( x , y ) . M                         :: :: unpair
+    | \ { . . . , i . Mi , . . . }                  :: :: prod
+    | i ` M                                         :: :: proj
+    | \ x . M                                       :: :: lam
+    | V ` M                                         :: :: app
+
+
+  A :: 'A_' ::=
+    | U B           :: :: thunk
+    | sumiI Ai      :: :: sum
+    | 1             :: :: unit
+    | A times A'    :: :: prod
+
+  B {{ tex \underline{B} }}:: 'B_' ::=
+    | F A           :: :: returner
+    | prodiI Bi     :: :: product
+    | A -> B        :: :: fn
+
+  G {{ tex \Gamma }} :: 'G_' ::=
+    | empty          :: :: emp
+    | G , x : A      :: :: cons
+    | G , x : A , G' :: :: mid
+
+  terminals :: 'terminals_' ::=
+    | \             ::  :: lambda     {{ tex \lambda }}
+    | |-c           ::  :: turnstilec {{ tex \vdash^c }}
+    | |-v           ::  :: turnstilev {{ tex \vdash^v }}
+    | ->            ::  :: fn         {{ tex \rightarrow }}
+    | sumiI         ::  :: sum        {{ tex \Sigma_{i \in I} }}
+    | prodiI        ::  :: prod       {{ tex \Pi_{i \in I} }}
+    | times         ::  :: times      {{ tex \times }}
+
+  formula :: formula_ ::=
+    | judgement :: :: judgement
+    | formula1 .. formulai :: :: dots
+
+defns
+  Jtype :: '' ::=
+
+defn
+  G |-v V : A :: :: GtA :: A_ by
+
+  ------------------ :: var
+  G, x:A, G' |-v x:A
+
+  G |-c M:B
+  -------------------::thunk
+  G |-v thunk M : U B
+
+  G |-v V : Ai
+  ------------------------::sum
+  G |-v (i, V) : sumiI Ai
+
+  G |-v V : A
+  G |-v V' : A'
+  --------------------------::pair
+  G |-v (V, V') : A times A'
+
+defn
+  G |-c M : B :: :: GtB :: B_ by
+
+  G |-v V:A
+  G, x:A |-c M:B
+  -----------------------::let
+  G |-c let V be x. M : B
+
+  G |-v V:A
+  --------------------::return
+  G |-c return V : F A
+
+  G |-c M : F A
+  G, x:A |-c N : B
+  -------------------::seq
+  G |-c M to x. N : B
+
+  G |-v V : U B
+  -----------------::force
+  G |-c force V : B
+
+  G |-v V:sumiI Ai
+  </ G, x:Ai |-c Mi : B // i />
+  ------------------------------------::pm
+  G |-c pm V as {...,(i,x).Mi,...} : B
+
+  G |-v V : A times A'
+  G, x:A, y:A' |-c M : B
+  -------------------------::unpair
+  G |-c pm V as (x,y).M : B
+
+  </ G |-c Mi : B // i />
+  -----------------------------------::prod
+  G |-c \{..., i.Mi, ...} : prodiI Bi
+
+  G |-c M : prodiI Bi
+  -------------------::proj
+  G |-c i`M : Bi
+
+  G,x:A |-c M : B
+  ------------------ :: lam
+  G |-c \x.M : A -> B
+
+  G |-v V : A
+  G |-c M : A -> B
+  --------------- :: app
+  G |-c V`M : B
