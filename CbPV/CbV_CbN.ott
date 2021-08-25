@@ -1,5 +1,4 @@
 metavar x ::=
-% metavar A ::=
 
 grammar
   M, N :: 'Tm_' ::=

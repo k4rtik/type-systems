@@ -1,10 +1,11 @@
+TARGET = CbPV
 all: ott pdf
 
-ott: CbV_CbN.ott
-	ott CbV_CbN.ott -o CbV_CbN.tex
+ott: $(TARGET).ott
+	ott $(TARGET).ott -o $(TARGET).tex
 
-pdf: CbV_CbN.tex
-	texfot pdflatex CbV_CbN.tex
+pdf: $(TARGET).tex
+	texfot pdflatex $(TARGET).tex
 
 clean:
 	rm -f *.tex *.aux *.pdf *.log
