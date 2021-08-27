@@ -10,17 +10,19 @@ grammar
     | ( V , V' )    :: :: pair
 
   M, N :: 'M_' ::=
-    | let V be x . M                                :: :: let
-    | return V                                      :: :: return
-    | M to x . N                                    :: :: seq
-    | force V                                       :: :: force
-    | pm V as { . . . , ( i , x ) . Mi , . . . }    :: :: pm
+    | let V be x . M                                ::  :: let
+    | return V                                      ::  :: return
+    | return                                        :: S:: return1
+    | M to x . N                                    ::  :: seq
+    | M ; N                                         :: S:: seq1
+    | force V                                       ::  :: force
+    | pm V as { . . . , ( i , x ) . Mi , . . . }    ::  :: pm
                         (+ bind x in Mi +)
-    | pm V as ( x , y ) . M                         :: :: unpair
-    | \ { . . . , i . Mi , . . . }                  :: :: prod
-    | i ` M                                         :: :: proj
-    | \ x . M                                       :: :: lam
-    | V ` M                                         :: :: app
+    | pm V as ( x , y ) . M                         ::  :: unpair
+    | \ { . . . , i . Mi , . . . }                  ::  :: prod
+    | i ` M                                         ::  :: proj
+    | \ x . M                                       ::  :: lam
+    | V ` M                                         ::  :: app
 
 
   A :: 'A_' ::=
@@ -86,10 +88,18 @@ defn
   --------------------::return
   G |-c return V : F A
 
+  ------------------::return1
+  G |-c return : F 1
+
   G |-c M : F A
   G, x:A |-c N : B
   -------------------::seq
   G |-c M to x. N : B
+
+  G |-c M : F 1
+  G |-c N : B
+  ---------------::seq1
+  G |-c M ; N : B
 
   G |-v V : U B
   -----------------::force
