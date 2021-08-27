@@ -36,6 +36,7 @@ grammar
     | prodiI Bi     :: :: product
     | A -> B        :: :: fn
 
+
   G {{ tex \Gamma }} :: 'G_' ::=
     | empty          :: :: emp
     | G , x : A      :: :: cons

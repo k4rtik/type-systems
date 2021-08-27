@@ -1,4 +1,4 @@
-TARGET = CbPV
+TARGET = JWA
 all: ott pdf
 
 ott: $(TARGET).ott
