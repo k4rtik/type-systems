@@ -1,0 +1,53 @@
+metavar x, v ::=
+metavar nat, n ::=
+metavar region, r ::=
+
+grammar
+  RPL, R :: 'R_' ::=
+    | Root          :: :: root
+    | rho           :: :: parameter
+    | v             :: :: variable
+    | R : r         :: :: child
+    | R : [ i ]     :: :: index
+    | R : *         :: :: any
+
+  Effect, E :: 'E_' ::=
+    | emp               :: :: empty
+    | reads R           :: :: reads
+    | writes R          :: :: writes
+    | invokes m with E  :: :: invokes
+    | E \u E'           :: :: union
+
+  Exp, e :: 'e_' ::=
+    | let x = e in e'           :: :: let
+    | v [ n ] = v'              :: :: assign
+    | v [ n ]                   :: :: lookup
+    | v                         :: :: var
+    | new T [ n ] < R > # i     :: :: arr
+
+  Typ, T :: 'T_' ::=
+    | T [ ] < R > # i   :: :: array
+
+  m :: 'm_' ::=
+    | T m ( T' x ) E { e } :: :: method
+
+  G {{ tex \Gamma }} :: 'G_' ::=
+    | empty          :: :: emp
+    | G , x : A      :: :: binding
+    | G , rho sub R  :: :: constraint
+    | G , i          :: :: index
+
+  terminals :: 'terminals_' ::=
+    | \             ::  :: lambda     {{ tex \lambda }}
+    | ->            ::  :: fn         {{ tex \rightarrow }}
+    | rho           ::  :: rho        {{ tex \rho }}
+    | \u            ::  :: union      {{ tex \cup }}
+    | emp           ::  :: empty      {{ tex \emptyset }}
+    | sub           ::  :: subset     {{ tex \subseteq }}
+
+  formula :: formula_ ::=
+    | judgement :: :: judgement
+    % | formula1 .. formulai :: :: dots
+
+defns
+  Jtype :: '' ::=
