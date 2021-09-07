@@ -1,0 +1,202 @@
+metavar TVar, a {{ tex \alpha }}, b {{ tex \beta }} ::= {{ com Type variables }}
+metavar IVar, vtheta {{ tex \vartheta }}, theta {{ tex \theta }} ::= {{ com RGN index variables }}
+metavar VVar, f, x ::= {{ com Value variables }}
+
+indexvar i, n ::=
+
+grammar
+t {{ tex \tau }} :: '' ::= {{ com Types }}
+    | Int                           :: :: int
+    | t1 -> t2                      :: :: arr
+    | t1 times .. times tn          :: :: prod
+    | unit                          :: S :: unit
+    | a                             :: :: typevar
+    | all a . t                     :: :: polytype
+    | RGN theta t                   :: :: region
+    | RGNRef theta t                :: :: rref
+    | RGNHnd theta                  :: :: hnd
+    | RGNPf ( theta1 <= theta2 )    :: :: witness
+    | all vtheta . t                :: :: polyrgn
+    | t [ t1 / a ]                  :: M :: typesubst
+    | t [ theta / vtheta ]          :: M :: rgnsubst
+    | ( t )                         :: M :: paren
+
+e :: '' ::= {{ com Terms }}
+    | i                 :: :: iconst
+    | e1 + e2           :: :: sum
+    | x                 :: :: var
+    | \ x : t . e       :: :: abs
+    | e1 e2             :: :: app
+    | < e1 , .. , en >  :: :: tpl
+    | sel i e           :: :: proj
+    | \\ a . e          :: :: tabs
+    | e [ t ]           :: :: tapp
+    | let x = e1 in e2  :: :: let
+    | runRGN [ t ] v    :: :: runrgn
+    | k                 :: :: cmd
+    | \\ vtheta . e     :: :: rabs
+    | e [ theta ]       :: :: rapp
+
+k {{ tex \kappa }} :: '' ::= {{ com RGN commands }}
+    | returnRGN [ theta ] [ t ] v           :: :: return
+    | thenRGN [ theta ] [ t1 ] [ t2 ] v1 v2 :: :: then
+    | letRGN [ theta ] [ t ] v              :: :: letrgn
+    | newRGNRef [ theta ] [ t ] v v'        :: :: new
+    | readRGNRef [ theta ] [ t ] v          :: :: read
+    | writeRGNRef [ theta ] [ t ] v v'      :: :: write
+
+v :: '' ::= {{ com Values }}
+    | i                 :: :: vint
+    | x                 :: :: vvar
+    | \ x : t . e       :: :: vabs
+    | < v1 , .. , vn >  :: :: vtpl
+    | \\ a . e          :: :: vtabs
+    | k                 :: :: vcmd
+    | \\ vtheta . e     :: :: vrabs
+
+
+  D {{ tex \Delta }} :: 'D_' ::= {{ com Type and index contexts }}
+    | empty         :: :: emp
+    | D , a         :: :: type
+    | D , vtheta    :: :: index
+
+  G {{ tex \Gamma }} :: 'G_' ::= {{ com Value contexts }}
+    | empty          :: :: emp
+    | G , x : t      :: :: cons
+
+  terminals :: 'terminals_' ::=
+    | \             ::  :: lambda     {{ tex \lambda }}
+    | \\            ::  :: blambda    {{ tex \Lambda }}
+    | |-t           ::  :: turnstilec {{ tex \vdash_{type} }}
+    | |-e           ::  :: turnstilev {{ tex \vdash_{exp} }}
+    | |-i           ::  :: turnstilei {{ tex \vdash_{index} }}
+    | |-v           ::  :: tstilevc   {{ tex \vdash_{vctxt} }}
+    | |-c           ::  :: tstilec    {{ tex \vdash_{ctxt} }}
+    | ->            ::  :: fn         {{ tex \rightarrow }}
+    | all           ::  :: all        {{ tex \forall }}
+    | <=            ::  :: inclusion  {{ tex \preceq }}
+    | <             ::  :: lefttpl    {{ tex \langle }}
+    | >             ::  :: rgttpl     {{ tex \rangle }}
+    | empty         ::  :: empty      {{ tex \cdot }}
+    | times         ::  :: times      {{ tex \times }}
+    | in            ::  :: in         {{ tex \in }}
+
+  formula :: formula_ ::=
+    | judgement             :: :: judgement
+    | formula1 .. formulai  :: :: dots
+    | x in dom ( G )        :: :: indomain
+    | G ( x ) = t           :: :: hastype
+
+subrules
+    v <:: e
+
+defns
+  Jtype :: '' ::=
+
+defn
+  |-c D ; G :: :: DG :: C_ by
+
+defn
+  D |-t t :: :: Dt :: T_ by
+
+defn
+  D |-i theta :: :: Di :: I_ by
+
+defn
+  D ; G |-e e : t :: :: DGe :: E_ by
+
+    |-c D; G
+    ----------------::int
+    D; G |-e i : Int
+
+    D; G |-e e1 : Int
+    D; G |-e e2 : Int
+    ----------------------::sum
+    D; G |-e e1 + e2 : Int
+
+    |-c D; G
+    x in dom(G)
+    G(x) = t
+    --------------::var
+    D; G |-e x : t
+
+    D; G, x:t1 |-e e:t
+    --------------------------::abs
+    D; G |-e \x:t1.e : t1 -> t
+
+    D; G |-e e1 : t1 -> t
+    D; G |-e e2 : t1
+    ----------------------::app
+    D; G |-e e1 e2 : t
+
+    % TODO: add prod and proj rules if needed
+
+    |-c D; G
+    D, a ; G |-e e:t
+    ------------------------::tabs
+    D; G |-e \\a.e : all a.t
+
+    D; G |-e e : all a.t
+    D |-t t1
+    -------------------------::tapp
+    D; G |-e e [t1] : t[t1/a]
+
+    D; G |-e e1 : t1
+    D; G, x:t1 |-e e2 : t
+    -----------------------------::let
+    D; G |-e let x = e1 in e2 : t
+
+    D |-t t
+    D; G |-e v : all vtheta.RGNHnd vtheta -> RGN vtheta t
+    -----------------------------------------------------::runrgn
+    D; G |-e runRGN [t] v : t
+
+    |-c D; G
+    D, vtheta ; G |-e e:t
+    ----------------------------------::rabs
+    D; G |-e \\vtheta.e : all vtheta.t
+
+    D; G |-e e : all vtheta.t
+    D |-i theta
+    ------------------------------------::rapp
+    D; G |-e e [theta] : t[theta/vtheta]
+
+    D |-i theta
+    D |-t t
+    D; G |-e v:t
+    ----------------------------------------------::return
+    D; G |-e returnRGN [theta] [t] v : RGN theta t
+
+    D |-i theta
+    D |-t t1
+    D |-t t2
+    D; G |-e v1:RGN theta t1
+    D; G |-e v2:t1->RGN theta t2
+    -------------------------------------------------------::then
+    D; G |-e thenRGN [theta] [t1] [t2] v1 v2 : RGN theta t2
+
+    D |-i theta1
+    D |-t t
+    D; G |-e v : all vtheta.RGNPf(theta1 <= theta2) -> RGNHnd vtheta2 -> RGN vtheta2 t
+    ----------------------------------------------------------------------------------::letrgn
+    D; G |-e letRGN [theta1] [t] v : RGN theta1 t
+
+    D |-i theta
+    D |-t t
+    D; G |-e v:RGNHnd theta
+    D; G |-e v':t
+    ----------------------------------------------------------------::new
+    D; G |-e newRGNRef [theta] [t] v v' : RGN theta (RGNRef theta t)
+
+    D |-i theta
+    D |-t t
+    D; G |-e v:RGNRef theta t
+    -----------------------------------------------::read
+    D; G |-e readRGNRef [theta] [t] v : RGN theta t
+
+    D |-i theta
+    D |-t t
+    D; G |-e v:RGNRef theta t
+    D; G |-e v':t
+    --------------------------------------------::write
+    D; G |-e writeRGNRef [theta] [t] v v' : unit
