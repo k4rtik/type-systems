@@ -79,12 +79,12 @@ v :: '' ::= {{ com Values }}
     | >             ::  :: rgttpl     {{ tex \rangle }}
     | empty         ::  :: empty      {{ tex \cdot }}
     | times         ::  :: times      {{ tex \times }}
-    | in            ::  :: in         {{ tex \in }}
+    | ins           ::  :: in         {{ tex \in }}
 
   formula :: formula_ ::=
     | judgement             :: :: judgement
     | formula1 .. formulai  :: :: dots
-    | x in dom ( G )        :: :: indomain
+    | x ins dom ( G )       :: :: indomain
     | G ( x ) = t           :: :: hastype
 
 subrules
@@ -115,7 +115,7 @@ defn
     D; G |-e e1 + e2 : Int
 
     |-c D; G
-    x in dom(G)
+    x ins dom(G)
     G(x) = t
     --------------::var
     D; G |-e x : t
@@ -177,8 +177,8 @@ defn
 
     D |-i theta1
     D |-t t
-    D; G |-e v : all vtheta.RGNPf(theta1 <= theta2) -> RGNHnd vtheta2 -> RGN vtheta2 t
-    ----------------------------------------------------------------------------------::letrgn
+    D; G |-e v : all vtheta2.RGNPf(theta1 <= vtheta2) -> RGNHnd vtheta2 -> RGN vtheta2 t
+    ------------------------------------------------------------------------------------::letrgn
     D; G |-e letRGN [theta1] [t] v : RGN theta1 t
 
     D |-i theta
