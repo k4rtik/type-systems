@@ -1,0 +1,104 @@
+metavar alpha {{ tex \alpha }}, beta {{ tex \beta }} ::=
+metavar alphac {{ tex \underline{\alpha} }}, betac {{ tex \underline{\beta} }} ::=
+metavar x ::=
+metavar z ::=
+
+indexvar i ::=
+
+% ECBV has value types and computation types
+
+grammar
+  A, B :: 'V_' ::=
+    | alpha         :: :: constv
+    | 1             :: :: unit
+    | A times B     :: :: prod
+    | Ac lolli Bc   :: :: functionspace
+
+  Ac {{ tex \underline{A} }}, Bc {{ tex \underline{B} }}, Cc {{ tex \underline{C} }} :: 'C_' ::=
+    | alphac        :: :: constc
+    | ! A otimes Bc :: :: tensor
+
+  s, t, u :: 't_' ::=
+    | x                         :: :: valvar
+    | z                         :: :: compvar
+    | st                        :: :: unit
+    | < t , u >                 :: :: pair
+    | pi i ( t )                :: :: proj {{ tex \pi_[[i]]([[t]]) }}
+    | \ z  . t                  :: :: abs
+    | s [ t ]                   :: :: app
+    | ! t otimes u              :: :: tensor
+    | t to ( ! x otimes z ) . u :: :: seq
+
+  G {{ tex \Gamma }} :: 'G_' ::=
+    % | empty          :: :: emp
+    | G , t : A      :: :: cons
+    | G , t : A , G' :: :: mid
+
+  D {{ tex \Delta }} :: 'D_' ::=
+    | -                 :: :: emp
+    | z : Ac            :: :: lone
+    % | D , z : Ac        :: :: cons
+
+  terminals :: 'terminals_' ::=
+    | \             ::  :: lambda     {{ tex \underline{\lambda} }}
+    | |-c           ::  :: turnstilec {{ tex \vdash^c }}
+    | |-v           ::  :: turnstilev {{ tex \vdash^v }}
+    | times         ::  :: times      {{ tex \times }}
+    | lolli         ::  :: lolli      {{ tex \multimap }}
+    | otimes        ::  :: otimes     {{ tex \otimes }}
+    | <             ::  :: leftp      {{ tex \langle }}
+    | >             ::  :: rightp     {{ tex \rangle }}
+    | |             ::  :: mid        {{ tex \mid }}
+    | !             ::  :: bang       {{ tex \,! }}
+    | st            ::  :: star       {{ tex \star }}
+    | pi            ::  :: pi         {{ tex \pi }}
+
+  formula :: formula_ ::=
+    | judgement :: :: judgement
+    | formula1 .. formulai :: :: dots
+
+defns
+  Jtype :: '' ::=
+
+defn
+  G | - |-v t : B :: :: GtV :: TV_ by
+
+  ---------------------- :: var
+  G, x:A, G' | - |-v x:A
+
+  --------------- :: unit
+  G | - |-v st : 1
+
+  G | - |-v t : A
+  G | - |-v u : B
+  ----------------------------::pair
+  G | - |-v <t, u> : A times B
+
+  G | - |-v t : A1 times A2
+  -------------------------::proj
+  G | - |-v pi i (t) : Ai
+
+  G | z:Ac |-c t:Bc
+  ---------------------------- :: lam
+  G | - |-v \z.t : Ac lolli Bc
+
+defn
+  G | D |-c t : Bc :: :: GtC :: TC_ by
+
+  ------------------ :: cvar
+  G | z:Ac |-c z:Ac
+
+  G | - |-v s : Ac lolli Bc
+  G | D |-c t : Ac
+  ------------------------- :: app
+  G | D |-c s[t] : Bc
+
+  G | - |-v t : A
+  G | D |-c u : Bc
+  ------------------------------------:: tensor
+  G | D |-c !t otimes u : !A otimes Bc
+
+  G | D |-c t : !A otimes Bc
+  G, x:A | z:Bc |-c u : Cc
+  ------------------------------------::seq
+  G | D |-c t to (!x otimes z).u  : Cc
