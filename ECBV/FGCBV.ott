@@ -1,0 +1,85 @@
+metavar alpha {{ tex \alpha }} ::=
+metavar x ::=
+
+indexvar i ::=
+
+% ECBV has value types and computation types
+
+grammar
+  s {{ tex \sigma }}, t {{ tex \tau }} :: 'T_' ::=
+    | alpha       :: :: constv
+    | 1           :: :: unit
+    | s times t   :: :: prod
+    | s parr t    :: :: functionspace
+
+  V, W, M, N :: 't_' ::=
+    | x                         :: :: valvar
+    | st                        :: :: unit
+    | < V1 , V2 >               :: :: pair
+    | pi i ( V )                :: :: proj {{ tex \pi_[[i]]([[V]]) }}
+    | return V                  :: :: return
+    | M to x . N                :: :: seq
+    | \ x  . N                  :: :: s1bs
+    | V W                       :: :: s1pp
+
+  G {{ tex \Gamma }} :: 'G_' ::=
+    % | empty          :: :: emp
+    | G , M : s      :: :: cons
+    | G , M : s , G' :: :: mid
+
+  terminals :: 'terminals_' ::=
+    | \             ::  :: lambda     {{ tex \lambda }}
+    | |-p           ::  :: turnstilep {{ tex \vdash^p }}
+    | |-v           ::  :: turnstilev {{ tex \vdash^v }}
+    | times         ::  :: times      {{ tex \times }}
+    | parr         ::  :: parr        {{ tex \rightharpoonup }}
+    | <             ::  :: leftp      {{ tex \langle }}
+    | >             ::  :: rightp     {{ tex \rangle }}
+    | st            ::  :: star       {{ tex \star }}
+    | pi            ::  :: pi         {{ tex \pi }}
+
+  formula :: formula_ ::=
+    | judgement :: :: judgement
+    | formula1 .. formulai :: :: dots
+
+defns
+  Jtype :: '' ::=
+
+defn
+  G |-v V : s :: :: GtV :: V_ by
+
+  ---------------------- :: var
+  G, x:s, G' |-v x:s
+
+  --------------- :: unit
+  G |-v st : 1
+
+  G |-v V1 : s1
+  G |-v V2 : s2
+  ----------------------------::pair
+  G |-v <V1, V2> : s1 times s2
+
+  G |-v V : s1 times s2
+  -------------------------::proj
+  G |-v pi i (V) : si
+
+  G, x:s |-p N:t
+  ---------------------------- :: lam
+  G |-v \x.N : s parr t
+
+defn
+  G |-p M : s :: :: GtP :: P_ by
+
+  G |-v V : s parr t
+  G |-v W : s
+  ------------------------- :: app
+  G |-p V W : t
+
+  G |-v V : s
+  ------------------------------------:: return
+  G |-p return V : s
+
+  G |-p M : s
+  G, x:s |-p N : t
+  ------------------------------------::seq
+  G |-p M to x.N  : t

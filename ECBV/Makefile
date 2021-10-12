@@ -1,4 +1,4 @@
-TARGET = ECBV
+TARGET = FGCBV
 all: ott pdf
 
 ott: $(TARGET).ott
